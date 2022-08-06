@@ -1,5 +1,11 @@
 const socket = io()
 
+let pathname = window.location.pathname
+let email = pathname.split('/')[3]
+console.log(email)
+
+
+
 fetch('/req').then(r=>r.json()).then(user=>{
 
     //socket.emit('createCart')
@@ -29,9 +35,11 @@ fetch('/req').then(r=>r.json()).then(user=>{
             socket.emit('message',{
                 email:user.isAdmin == 'false'?user.username:replyEmail.value,
                 message:sendBox.value,
-                type: type
+                type: type,
+                filter:email
             })
             sendBox.value = ''
+            replyEmail.value = ''
         }
         else {console.log('fallo')}
     }
@@ -42,9 +50,16 @@ fetch('/req').then(r=>r.json()).then(user=>{
             handleChatForm(e)
         }
     })
+
 })
+
+socket.on('prueba',async data => {
+    console.log('ok')
+    socket.emit('private',email)
+})
+
     
-socket.on('messages', async data => {
+socket.on('privateMessages', async data => {
     console.log(data)
     let messageBox = document.getElementById('chatBox')
 

@@ -11,6 +11,16 @@ export const socket = async (socket) => {
         let messages = await (await messageServices.getMessages()).payload
         io.emit('products',products)
         io.emit('messages',messages)
+
+        socket.on('private',async data=>{
+            console.log(data)
+            let messagesPrivate = await (await messageServices.getMessagesByEmail(data)).payload
+            console.log(messagesPrivate)
+            io.emit('privateMessages',messagesPrivate)
+        })
+
+        io.emit('prueba')
+
     
         socket.on('createCart', async data=>{
             let newCart = await cartServices.new()
@@ -97,6 +107,8 @@ export const socket = async (socket) => {
             .then(r=>console.log(r))
             let messages = await (await messageServices.getMessages()).payload
             io.emit('messages',messages)
+            let messagesPrivate = await (await messageServices.getMessagesByEmail(data.filter)).payload
+            io.emit('privateMessages',messagesPrivate)
 
         })
 }

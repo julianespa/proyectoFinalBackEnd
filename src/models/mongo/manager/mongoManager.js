@@ -143,4 +143,9 @@ export class MessageManager {
         let payload = await Message.find({},{__v:0})
         return {status:'success', payload:payload}
     }
+
+    getMessagesByEmail = async (email) => {
+        let payload = await Message.find({email:''+email},{__v:0})
+        return {status:'success', payload:payload}
+    }
 }
