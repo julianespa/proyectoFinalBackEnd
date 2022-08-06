@@ -2,7 +2,7 @@ import { loggerConsole, loggerWarn } from "../services/users.services.js";
 import { transporter } from "../services/users.services.js";
 
 export const getHome = async (req,res) => {
-    if(req.isAuthenticated()) return res.redirect('http://localhost:8080/api/products')
+    if(req.isAuthenticated()) return res.redirect('/api/products')
     res.render('login')
     loggerConsole.info(`${req.method} to ${req.get('host')}${req.originalUrl}`)
 }
