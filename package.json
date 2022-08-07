@@ -12,7 +12,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "artillery": "^2.0.0-18",
     "bcrypt": "^5.0.1",
     "dotenv": "^16.0.1",
     "ejs": "^3.1.8",

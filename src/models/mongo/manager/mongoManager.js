@@ -1,6 +1,7 @@
 import { productsService } from "../models/products.js";
 import { cartsService } from "../models/carts.js";
 import { Message } from "../models/messages.js";
+import { Order } from "../models/orders.js";
 
 
 export class ProductManager {
@@ -147,5 +148,24 @@ export class MessageManager {
     getMessagesByEmail = async (email) => {
         let payload = await Message.find({email:''+email},{__v:0})
         return {status:'success', payload:payload}
+    }
+}
+
+export class OrdersManager {
+    addOrder = async (obj) => {
+        let order = {}
+        let ordersQty = await (await Order.find({})).length
+        if(ordersQty == 0){
+            order.orderNumber = 1
+        }else {
+            order.orderNumber = ordersQty+1
+        }
+        order.date = new Date()
+        order.state = 'created'
+        order.email = obj.email
+        order.items = obj.items
+
+        let saveOrder = await Order.insertMany(order)
+        return {status:'success',payload:saveOrder}
     }
 }

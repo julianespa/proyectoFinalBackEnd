@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
 import { io } from "../../app.js";
-import { cartServices, messageServices, productServices } from "../models/DAOs/daos.js";
+import { cartServices, messageServices, productServices, orderServices } from "../models/DAOs/daos.js";
 import { client, loggerConsole, loggerError, TEST_MAIL, transporter } from "./users.services.js";
 
 
@@ -13,7 +13,7 @@ export const socket = async (socket) => {
         io.emit('messages',messages)
 
         socket.on('private',async data=>{
-            console.log(data)
+            
             let messagesPrivate = await (await messageServices.getMessagesByEmail(data)).payload
             console.log(messagesPrivate)
             io.emit('privateMessages',messagesPrivate)
@@ -27,6 +27,7 @@ export const socket = async (socket) => {
             let cartID = newCart.payload[0]._id
             io.emit('cartCreated',{cart:newCart})
             socket.on('addProductToCart', async idProd=>{
+                console.log('ok')
                 await cartServices.add(cartID,idProd)
                 let cart = await cartServices.get(cartID)
                 let prodInCartIds = cart.payload[0].products
@@ -45,11 +46,17 @@ export const socket = async (socket) => {
             })
             socket.on('finishPurchase',async data=>{
                 loggerConsole.info(data)
+        
+                let orderObj = {
+                    items: [],
+                    email: data[data.length-1].email
+                }
     
                 let articulosPedido = ''
                 let articulosPedidoWapp = ''
                 for (let i = 0; i < data.length-1; i++) {
                     const articulo = data[i];
+                    orderObj.items.push(articulo)
                     articulosPedidoWapp = articulosPedidoWapp+`
                     name: ${articulo.name}
                     price: ${articulo.price}
@@ -66,9 +73,15 @@ export const socket = async (socket) => {
                     subject: `nuevo pedido de ${data[data.length-1].user} , email ${data[data.length-1].email} `,
                     html: `lista de pedido:<br> ${articulosPedido}`
                 }
+
+                
             
                 
                 try {
+
+                    const addOrder = await orderServices.addOrder(orderObj)
+                    loggerConsole.info(addOrder)
+                    
                     const info = await transporter.sendMail(mailOptions2)
                     loggerConsole.info(info)
     
@@ -100,11 +113,10 @@ export const socket = async (socket) => {
         })
 
         socket.on('message', async data => {
-            console.log(data)
             let message = {...data}
         
             await messageServices.addMessage(message.email,message.type,message.message)
-            .then(r=>console.log(r))
+            .then(r=>loggerConsole.info(r))
             let messages = await (await messageServices.getMessages()).payload
             io.emit('messages',messages)
             let messagesPrivate = await (await messageServices.getMessagesByEmail(data.filter)).payload
